@@ -35,9 +35,10 @@ pub fn check_noqa(
         }
 
         if enforce_noqa {
-            noqa_directives
-                .entry(lineno - 1)
-                .or_insert_with(|| (noqa::extract_noqa_directive(lines[lineno - 1]), vec![]));
+            let Some(directive) = noqa::extract_noqa_directive(lines[lineno - 1]) else {
+                continue
+            };
+            noqa_directives.insert(lineno - 1, (directive, vec![]));
         }
     }
 
@@ -51,9 +52,16 @@ pub fn check_noqa(
         if let Some(parent_lineno) = diagnostic.parent.map(|location| location.row()) {
             let noqa_lineno = noqa_line_for.get(&parent_lineno).unwrap_or(&parent_lineno);
             if commented_lines.contains(noqa_lineno) {
-                let noqa = noqa_directives.entry(noqa_lineno - 1).or_insert_with(|| {
-                    (noqa::extract_noqa_directive(lines[noqa_lineno - 1]), vec![])
-                });
+                let noqa = if let Some(entry) = noqa_directives.get_mut(&(noqa_lineno - 1)) {
+                    entry
+                } else {
+                    let Some(directive) = noqa::extract_noqa_directive(lines[noqa_lineno - 1]) else {
+                        continue
+                    };
+                    noqa_directives
+                        .entry(noqa_lineno - 1)
+                        .or_insert_with(|| (directive, vec![]))
+                };
                 match noqa {
                     (Directive::All(..), matches) => {
                         matches.push(diagnostic.kind.code().as_ref());
@@ -67,7 +75,6 @@ pub fn check_noqa(
                             continue;
                         }
                     }
-                    (Directive::None, ..) => {}
                 }
             }
         }
@@ -78,9 +85,16 @@ pub fn check_noqa(
             .get(&diagnostic_lineno)
             .unwrap_or(&diagnostic_lineno);
         if commented_lines.contains(noqa_lineno) {
-            let noqa = noqa_directives
-                .entry(noqa_lineno - 1)
-                .or_insert_with(|| (noqa::extract_noqa_directive(lines[noqa_lineno - 1]), vec![]));
+            let noqa = if let Some(entry) = noqa_directives.get_mut(&(noqa_lineno - 1)) {
+                entry
+            } else {
+                let Some(directive) = noqa::extract_noqa_directive(lines[noqa_lineno - 1]) else {
+                    continue
+                };
+                noqa_directives
+                    .entry(noqa_lineno - 1)
+                    .or_insert_with(|| (directive, vec![]))
+            };
             match noqa {
                 (Directive::All(..), matches) => {
                     matches.push(diagnostic.kind.code().as_ref());
@@ -92,7 +106,6 @@ pub fn check_noqa(
                         ignored.push(index);
                     }
                 }
-                (Directive::None, ..) => {}
             }
         }
     }
@@ -190,7 +203,6 @@ pub fn check_noqa(
                         diagnostics.push(diagnostic);
                     }
                 }
-                Directive::None => {}
             }
         }
     }

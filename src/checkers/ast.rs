@@ -211,9 +211,9 @@ impl<'a> Checker<'a> {
             Location::new(noqa_lineno + 1, 0),
         ));
         match noqa::extract_noqa_directive(&line) {
-            Directive::None => false,
-            Directive::All(..) => true,
-            Directive::Codes(.., codes) => noqa::includes(code, &codes),
+            None => false,
+            Some(Directive::All(..)) => true,
+            Some(Directive::Codes(.., codes)) => noqa::includes(code, &codes),
         }
     }
 }

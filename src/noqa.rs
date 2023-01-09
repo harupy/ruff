@@ -33,37 +33,40 @@ pub fn is_file_exempt(line: &str) -> bool {
 
 #[derive(Debug)]
 pub enum Directive<'a> {
-    None,
     All(usize, usize, usize),
     Codes(usize, usize, usize, Vec<&'a str>),
 }
 
 /// Extract the noqa `Directive` from a line of Python source code.
-pub fn extract_noqa_directive(line: &str) -> Directive {
-    match NOQA_LINE_REGEX.captures(line) {
-        Some(caps) => match caps.name("spaces") {
-            Some(spaces) => match caps.name("noqa") {
-                Some(noqa) => match caps.name("codes") {
-                    Some(codes) => Directive::Codes(
-                        spaces.as_str().chars().count(),
-                        noqa.start(),
-                        noqa.end(),
-                        SPLIT_COMMA_REGEX
-                            .split(codes.as_str())
-                            .map(str::trim)
-                            .filter(|code| !code.is_empty())
-                            .collect(),
-                    ),
-                    None => {
-                        Directive::All(spaces.as_str().chars().count(), noqa.start(), noqa.end())
+pub fn extract_noqa_directive(line: &str) -> Option<Directive> {
+    if let Some(caps) = NOQA_LINE_REGEX.captures(line) {
+        if let Some(spaces) = caps.name("spaces") {
+            if let Some(noqa) = caps.name("noqa") {
+                match caps.name("codes") {
+                    Some(codes) => {
+                        return Some(Directive::Codes(
+                            spaces.as_str().chars().count(),
+                            noqa.start(),
+                            noqa.end(),
+                            SPLIT_COMMA_REGEX
+                                .split(codes.as_str())
+                                .map(str::trim)
+                                .filter(|code| !code.is_empty())
+                                .collect(),
+                        ))
                     }
-                },
-                None => Directive::None,
-            },
-            None => Directive::None,
-        },
-        None => Directive::None,
+                    None => {
+                        return Some(Directive::All(
+                            spaces.as_str().chars().count(),
+                            noqa.start(),
+                            noqa.end(),
+                        ))
+                    }
+                }
+            }
+        }
     }
+    None
 }
 
 /// Returns `true` if the string list of `codes` includes `code` (or an alias
@@ -139,7 +142,7 @@ fn add_noqa_inner(
             }
             Some(codes) => {
                 match extract_noqa_directive(line) {
-                    Directive::None => {
+                    None => {
                         // Add existing content.
                         output.push_str(line.trim_end());
 
@@ -153,7 +156,7 @@ fn add_noqa_inner(
                         output.push_str(line_ending);
                         count += 1;
                     }
-                    Directive::All(_, start, _) => {
+                    Some(Directive::All(_, start, _)) => {
                         // Add existing content.
                         output.push_str(line[..start].trim_end());
 
@@ -168,7 +171,7 @@ fn add_noqa_inner(
                         output.push_str(line_ending);
                         count += 1;
                     }
-                    Directive::Codes(_, start, _, existing) => {
+                    Some(Directive::Codes(_, start, _, existing)) => {
                         // Reconstruct the line based on the preserved check codes.
                         // This enables us to tally the number of edits.
                         let mut formatted = String::new();
