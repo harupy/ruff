@@ -343,43 +343,47 @@ pub(crate) fn f_strings(
         return;
     };
     let mut patches: Vec<(TextRange, String)> = vec![];
-    let mut lex = lexer::lex_starts_at(
+    // The template string may be followed by a closing parenthesis or a comment as shown below.
+    // To preserve them when constructing a fix, we need to know their position.
+    // ```
+    // ("{}").format(0)
+    //     ^^
+    //     │└ detect this position as `end`
+    //     └ `attr.end()`
+    //
+    // (
+    //   "{}" # comment
+    //   .format(0)
+    // )
+    // ```
+    let mut end = value.end();
+    for (tok, range) in lexer::lex_starts_at(
         checker.locator().slice(func.range()),
         Mode::Expression,
-        expr.start(),
+        func.start(),
     )
-    .flatten();
-    let end = loop {
-        match lex.next() {
-            Some((Tok::Dot, range)) => {
-                // ```
-                // (
-                //     "a"
-                //     " {} "
-                //     "b"
-                // ).format(x)
-                // ```
-                // ^ Get the position of the character before the dot.
-                //
-                // We know that the expression is a string literal, so we can safely assume that the
-                // dot is the start of an attribute access.
-                break range.start();
-            }
-            Some((Tok::String { .. }, range)) => {
+    .flatten()
+    {
+        match tok {
+            // We know that the expression is a string literal, so we can safely assume that the
+            // dot is the start of an attribute access.
+            Tok::Dot => break,
+            Tok::String { .. } => {
                 match try_convert_to_f_string(range, &mut summary, checker.locator()) {
                     Ok(Some(fstring)) => patches.push((range, fstring)),
                     // Skip any strings that don't require conversion (e.g., literal segments of an
                     // implicit concatenation).
-                    Ok(None) => continue,
+                    Ok(None) => {}
                     // If any of the segments fail to convert, then we can't convert the entire
                     // expression.
                     Err(_) => return,
                 }
             }
-            Some(_) => continue,
-            None => unreachable!("Should break from the `Tok::Dot` arm"),
+            Tok::Comment { .. } | Tok::Rpar => {}
+            _ => continue,
         }
-    };
+        end = range.end();
+    }
     if patches.is_empty() {
         return;
     }

@@ -807,10 +807,9 @@ UP032_0.py:94:5: UP032 [*] Use f-string instead of `format` call
 99  99  |     )
 100 100 |     # comment
 101     |-    .format(a=1, b=1)
-    101 |+    
-102 102 | )
-103 103 | 
-104 104 | (
+102 101 | )
+103 102 | 
+104 103 | (
 
 UP032_0.py:104:1: UP032 [*] Use f-string instead of `format` call
     |
