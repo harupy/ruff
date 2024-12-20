@@ -12,7 +12,7 @@ SIM300.py:2:1: SIM300 [*] Yoda condition detected
   |
   = help: Rewrite as `compare == "yoda"`
 
-ℹ Safe fix
+ℹ Unsafe fix
 1 1 | # Errors
 2   |-"yoda" == compare  # SIM300
   2 |+compare == "yoda"  # SIM300
@@ -31,7 +31,7 @@ SIM300.py:3:1: SIM300 [*] Yoda condition detected
   |
   = help: Rewrite as `age == 42`
 
-ℹ Safe fix
+ℹ Unsafe fix
 1 1 | # Errors
 2 2 | "yoda" == compare  # SIM300
 3   |-42 == age  # SIM300
@@ -51,7 +51,7 @@ SIM300.py:4:1: SIM300 [*] Yoda condition detected
   |
   = help: Rewrite as `compare == ("a", "b")`
 
-ℹ Safe fix
+ℹ Unsafe fix
 1 1 | # Errors
 2 2 | "yoda" == compare  # SIM300
 3 3 | 42 == age  # SIM300
@@ -72,7 +72,7 @@ SIM300.py:5:1: SIM300 [*] Yoda condition detected
   |
   = help: Rewrite as `compare >= "yoda"`
 
-ℹ Safe fix
+ℹ Unsafe fix
 2 2 | "yoda" == compare  # SIM300
 3 3 | 42 == age  # SIM300
 4 4 | ("a", "b") == compare  # SIM300
@@ -93,7 +93,7 @@ SIM300.py:6:1: SIM300 [*] Yoda condition detected
   |
   = help: Rewrite as `compare > "yoda"`
 
-ℹ Safe fix
+ℹ Unsafe fix
 3 3 | 42 == age  # SIM300
 4 4 | ("a", "b") == compare  # SIM300
 5 5 | "yoda" <= compare  # SIM300
@@ -114,7 +114,7 @@ SIM300.py:7:1: SIM300 [*] Yoda condition detected
   |
   = help: Rewrite as `age < 42`
 
-ℹ Safe fix
+ℹ Unsafe fix
 4 4 | ("a", "b") == compare  # SIM300
 5 5 | "yoda" <= compare  # SIM300
 6 6 | "yoda" < compare  # SIM300
@@ -135,7 +135,7 @@ SIM300.py:8:1: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `age < -42`
 
-ℹ Safe fix
+ℹ Unsafe fix
 5 5 | "yoda" <= compare  # SIM300
 6 6 | "yoda" < compare  # SIM300
 7 7 | 42 > age  # SIM300
@@ -156,7 +156,7 @@ SIM300.py:9:1: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `age < +42`
 
-ℹ Safe fix
+ℹ Unsafe fix
 6  6  | "yoda" < compare  # SIM300
 7  7  | 42 > age  # SIM300
 8  8  | -42 > age  # SIM300
@@ -177,7 +177,7 @@ SIM300.py:10:1: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `age == YODA`
 
-ℹ Safe fix
+ℹ Unsafe fix
 7  7  | 42 > age  # SIM300
 8  8  | -42 > age  # SIM300
 9  9  | +42 > age  # SIM300
@@ -198,7 +198,7 @@ SIM300.py:11:1: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `age < YODA`
 
-ℹ Safe fix
+ℹ Unsafe fix
 8  8  | -42 > age  # SIM300
 9  9  | +42 > age  # SIM300
 10 10 | YODA == age  # SIM300
@@ -219,7 +219,7 @@ SIM300.py:12:1: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `age <= YODA`
 
-ℹ Safe fix
+ℹ Unsafe fix
 9  9  | +42 > age  # SIM300
 10 10 | YODA == age  # SIM300
 11 11 | YODA > age  # SIM300
@@ -240,7 +240,7 @@ SIM300.py:13:1: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `age == JediOrder.YODA`
 
-ℹ Safe fix
+ℹ Unsafe fix
 10 10 | YODA == age  # SIM300
 11 11 | YODA > age  # SIM300
 12 12 | YODA >= age  # SIM300
@@ -261,7 +261,7 @@ SIM300.py:14:1: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `(number - 100) > 0`
 
-ℹ Safe fix
+ℹ Unsafe fix
 11 11 | YODA > age  # SIM300
 12 12 | YODA >= age  # SIM300
 13 13 | JediOrder.YODA == age  # SIM300
@@ -281,7 +281,7 @@ SIM300.py:15:1: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `A[0][0] > B`
 
-ℹ Safe fix
+ℹ Unsafe fix
 12 12 | YODA >= age  # SIM300
 13 13 | JediOrder.YODA == age  # SIM300
 14 14 | 0 < (number - 100)  # SIM300
@@ -302,7 +302,7 @@ SIM300.py:16:5: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `A[0][0] > (B)`
 
-ℹ Safe fix
+ℹ Unsafe fix
 13 13 | JediOrder.YODA == age  # SIM300
 14 14 | 0 < (number - 100)  # SIM300
 15 15 | B<A[0][0]or B
@@ -321,7 +321,7 @@ SIM300.py:19:1: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `UPPER_LIST == ['upper']`
 
-ℹ Safe fix
+ℹ Unsafe fix
 16 16 | B or(B)<A[0][0]
 17 17 | 
 18 18 | # Errors in preview
@@ -342,7 +342,7 @@ SIM300.py:20:1: SIM300 [*] Yoda condition detected
    |
    = help: Rewrite as `DummyHandler.CONFIG == {}`
 
-ℹ Safe fix
+ℹ Unsafe fix
 17 17 | 
 18 18 | # Errors in preview
 19 19 | ['upper'] == UPPER_LIST

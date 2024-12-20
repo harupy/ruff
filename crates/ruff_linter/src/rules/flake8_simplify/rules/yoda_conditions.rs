@@ -231,7 +231,7 @@ pub(crate) fn yoda_conditions(
             },
             expr.range(),
         );
-        diagnostic.set_fix(Fix::safe_edit(Edit::range_replacement(
+        diagnostic.set_fix(Fix::unsafe_edit(Edit::range_replacement(
             pad(suggestion, expr.range(), checker.locator()),
             expr.range(),
         )));
